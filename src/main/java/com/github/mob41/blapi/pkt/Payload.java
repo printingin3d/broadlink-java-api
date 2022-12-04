@@ -29,6 +29,7 @@
 package com.github.mob41.blapi.pkt;
 
 public interface Payload {
+    static final Payload EMPTY_PAYLOAD = () -> new byte[0];
 
     public byte[] getData();
 

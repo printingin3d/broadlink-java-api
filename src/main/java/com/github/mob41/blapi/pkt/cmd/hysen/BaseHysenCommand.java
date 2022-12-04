@@ -49,7 +49,7 @@ public abstract class BaseHysenCommand implements CmdPayload {
     }
 
     @Override
-    public byte getCommand() {
+    public byte getPacketType() {
         return 0x6a;
     }
 

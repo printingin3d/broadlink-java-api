@@ -47,22 +47,18 @@ public class A1Device extends BLDevice {
         DatagramPacket packet = sendCmdPkt(new CmdPayload() {
 
             @Override
-            public byte getCommand() {
+            public byte getPacketType() {
                 return 0x6a;
             }
 
             @Override
             public Payload getPayload() {
-                return new Payload() {
+                return Payload.EMPTY_PAYLOAD;
+            }
 
-                    @Override
-                    public byte[] getData() {
-                        byte[] b = new byte[16];
-                        b[0] = 1;
-                        return b;
-                    }
-
-                };
+            @Override
+            public int getCommand() {
+                return 1;
             }
 
         });

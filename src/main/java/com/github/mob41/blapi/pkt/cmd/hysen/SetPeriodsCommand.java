@@ -39,4 +39,9 @@ public class SetPeriodsCommand extends BaseHysenCommand {
         return cmd;
     }
 
+    @Override
+    public int getCommand() {
+        return -1;
+    }
+
 }

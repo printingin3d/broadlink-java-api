@@ -34,22 +34,18 @@ import com.github.mob41.blapi.pkt.Payload;
 public final class RMTempCmdPayload implements CmdPayload {
 
     @Override
-    public byte getCommand() {
+    public byte getPacketType() {
         return 0x6a;
     }
 
     @Override
     public Payload getPayload() {
-        return new Payload() {
+        return Payload.EMPTY_PAYLOAD;
+    }
 
-            @Override
-            public byte[] getData() {
-                byte[] b = new byte[16];
-                b[0] = 0x01;
-                return b;
-            }
-
-        };
+    @Override
+    public int getCommand() {
+        return 0x01;
     }
 
 }

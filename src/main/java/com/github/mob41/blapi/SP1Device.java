@@ -48,7 +48,7 @@ public class SP1Device extends BLDevice {
         DatagramPacket packet = sendCmdPkt(new CmdPayload() {
 
             @Override
-            public byte getCommand() {
+            public byte getPacketType() {
                 return 0x66;
             }
 
@@ -64,6 +64,11 @@ public class SP1Device extends BLDevice {
                     }
 
                 };
+            }
+
+            @Override
+            public int getCommand() {
+                return -1;
             }
 
         });

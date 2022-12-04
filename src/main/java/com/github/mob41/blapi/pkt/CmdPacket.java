@@ -66,12 +66,8 @@ public class CmdPacket implements Packet {
      * @param cmdPayload
      *            The data to be sent
      */
-    public CmdPacket(Mac targetMac, int count, byte[] id, AES aesInstance, CmdPayload cmdPayload) {
-
-        byte cmd = cmdPayload.getCommand();
-        byte[] payload = cmdPayload.getPayload().getData();
-        byte[] headerdata;
-
+    public CmdPacket(Mac targetMac, int count, byte[] id, AES aesInstance, byte cmd, byte[] payload) {
+        log.debug("Unencrypted payload: "+DatatypeConverter.printHexBinary(payload));
         log.debug("Constructor CmdPacket starts");
         log.debug("count=" + count + " cmdPayload.cmd=" + Integer.toHexString(cmd) + " payload.len=" + payload.length);
 
@@ -80,7 +76,7 @@ public class CmdPacket implements Packet {
         log.debug("New count: " + count + " (added by 1)");
         log.debug("Creating byte array with data");
 
-        headerdata = new byte[BLDevice.DEFAULT_BYTES_SIZE];
+        byte[] headerdata = new byte[BLDevice.DEFAULT_BYTES_SIZE];
         for (int i = 0; i < headerdata.length; i++) {
             headerdata[i] = 0x00;
         }
@@ -94,8 +90,8 @@ public class CmdPacket implements Packet {
         headerdata[0x06] = (byte) 0xaa;
         headerdata[0x07] = 0x55;
 
-        headerdata[0x24] = 0x2a;
-        headerdata[0x25] = 0x27;
+        headerdata[0x24] = 0x0d;
+        headerdata[0x25] = 0x52;
         headerdata[0x26] = cmd;
 
         headerdata[0x28] = (byte) (count & 0xff);
@@ -103,12 +99,12 @@ public class CmdPacket implements Packet {
 
         byte[] mac = targetMac.getMac();
 
-        headerdata[0x2a] = mac[0];
-        headerdata[0x2b] = mac[1];
-        headerdata[0x2c] = mac[2];
-        headerdata[0x2d] = mac[3];
-        headerdata[0x2e] = mac[4];
-        headerdata[0x2f] = mac[5];
+        headerdata[0x2a] = mac[5];
+        headerdata[0x2b] = mac[4];
+        headerdata[0x2c] = mac[3];
+        headerdata[0x2d] = mac[2];
+        headerdata[0x2e] = mac[1];
+        headerdata[0x2f] = mac[0];
 
         headerdata[0x30] = id[0];
         headerdata[0x31] = id[1];
@@ -122,10 +118,11 @@ public class CmdPacket implements Packet {
 
           payloadPad = new byte[payload.length+numpad];
           for(int i = 0; i < payloadPad.length; i++) {
-        	  if(i < payload.length)
-        		  payloadPad[i] = payload[i];
-        	  else
-        		  payloadPad[i] = 0x00;
+        	  if(i < payload.length) {
+                payloadPad[i] = payload[i];
+            } else {
+                payloadPad[i] = 0x00;
+            }
           }
         }
 

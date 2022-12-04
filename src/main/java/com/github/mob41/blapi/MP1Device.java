@@ -81,7 +81,7 @@ public class MP1Device extends BLDevice {
         DatagramPacket packet = sendCmdPkt(new CmdPayload() {
 
             @Override
-            public byte getCommand() {
+            public byte getPacketType() {
                 return 0x6a;
             }
 
@@ -107,6 +107,11 @@ public class MP1Device extends BLDevice {
                     }
 
                 };
+            }
+
+            @Override
+            public int getCommand() {
+                return -1;
             }
 
         });
@@ -142,7 +147,7 @@ public class MP1Device extends BLDevice {
         DatagramPacket packet = sendCmdPkt(new CmdPayload() {
 
             @Override
-            public byte getCommand() {
+            public byte getPacketType() {
                 return 0x6a;
             }
 
@@ -165,6 +170,11 @@ public class MP1Device extends BLDevice {
                     }
 
                 };
+            }
+
+            @Override
+            public int getCommand() {
+                return -1;
             }
 
         });

@@ -40,13 +40,18 @@ public class AuthCmdPayload implements CmdPayload {
     }
 
     @Override
-    public byte getCommand() {
+    public byte getPacketType() {
         return 0x65;
     }
 
     @Override
     public Payload getPayload() {
         return authPayload;
+    }
+
+    @Override
+    public int getCommand() {
+        return -1;
     }
 
 }

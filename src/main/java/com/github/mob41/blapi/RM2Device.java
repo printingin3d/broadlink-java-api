@@ -34,9 +34,11 @@ import java.net.DatagramPacket;
 import javax.xml.bind.DatatypeConverter;
 
 import com.github.mob41.blapi.mac.Mac;
+import com.github.mob41.blapi.pkt.CmdPayload;
 import com.github.mob41.blapi.pkt.cmd.rm2.CheckDataCmdPayload;
 import com.github.mob41.blapi.pkt.cmd.rm2.EnterLearnCmdPayload;
 import com.github.mob41.blapi.pkt.cmd.rm2.RMTempCmdPayload;
+import com.github.mob41.blapi.pkt.cmd.rm2.SendDataCmdPayload;
 
 /**
  * Broadlink RM2 device client
@@ -101,6 +103,21 @@ public class RM2Device extends BLDevice {
         return null;
     }
 
+    public void sendData(byte[] input) throws IOException {
+        CmdPayload payload = new SendDataCmdPayload(input);
+        DatagramPacket packet = sendCmdPkt(10000, payload);
+        
+        byte[] data = packet.getData();
+
+        int err = data[0x22] | (data[0x23] << 8);
+
+        log.debug("RM2 check data received encrypted bytes: " + DatatypeConverter.printHexBinary(data));
+
+        if (err != 0) {
+            log.warn("RM2 check data received error: " + Integer.toHexString(err) + " / " + err);
+        }
+    }
+    
     /**
      * Requests the RM2 to enter learning mode.<br>
      * <br>
@@ -146,7 +163,7 @@ public class RM2Device extends BLDevice {
             byte[] pl = decryptFromDeviceMessage(data);
             log.debug("RM2 get temp received bytes (decrypted): " + DatatypeConverter.printHexBinary(pl));
 
-            return (double) (pl[0x4] * 10 + pl[0x5]) / 10.0;
+            return (pl[0x4] * 10 + pl[0x5]) / 10.0;
         } else {
             log.warn("RM2 get temp received error: " + Integer.toHexString(err) + " / " + err);
         }

@@ -28,6 +28,7 @@
  *******************************************************************************/
 package com.github.mob41.blapi.pkt.cmd.rm2;
 
+import com.github.mob41.blapi.pkt.BytePayload;
 import com.github.mob41.blapi.pkt.CmdPayload;
 import com.github.mob41.blapi.pkt.Payload;
 
@@ -35,28 +36,12 @@ public final class SendDataCmdPayload implements CmdPayload {
 
     private final Payload payload;
 
-    private final byte[] payloadBytes;
-
     private final byte[] dataBytes;
 
     public SendDataCmdPayload(byte[] irRfCodeData) {
         this.dataBytes = irRfCodeData;
 
-        payloadBytes = new byte[4 + dataBytes.length];
-        payloadBytes[0] = 0x02;
-
-        for (int i = 4; i < dataBytes.length; i++) {
-            payloadBytes[i] = dataBytes[i - 4];
-        }
-
-        payload = new Payload() {
-
-            @Override
-            public byte[] getData() {
-                return payloadBytes;
-            }
-
-        };
+        payload = new BytePayload(irRfCodeData);
     }
 
     /**
@@ -69,13 +54,18 @@ public final class SendDataCmdPayload implements CmdPayload {
     }
 
     @Override
-    public byte getCommand() {
+    public byte getPacketType() {
         return 0x6a;
     }
 
     @Override
     public Payload getPayload() {
         return payload;
+    }
+
+    @Override
+    public int getCommand() {
+        return 0x02;
     }
 
 }

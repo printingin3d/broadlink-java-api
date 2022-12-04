@@ -52,7 +52,7 @@ public class SP2Device extends BLDevice {
         DatagramPacket packet = sendCmdPkt(new CmdPayload() {
 
             @Override
-            public byte getCommand() {
+            public byte getPacketType() {
                 return 0x6a;
             }
 
@@ -62,13 +62,17 @@ public class SP2Device extends BLDevice {
 
                     @Override
                     public byte[] getData() {
-                        byte[] b = new byte[16];
-                        b[0] = (byte) 2;
-                        b[4] = (byte) (state ? 1 : 0);
+                        byte[] b = new byte[1];
+                        b[1] = (byte) (state ? 1 : 0);
                         return b;
                     }
 
                 };
+            }
+
+            @Override
+            public int getCommand() {
+                return 0x02;
             }
 
         });
@@ -88,22 +92,18 @@ public class SP2Device extends BLDevice {
         DatagramPacket packet = sendCmdPkt(new CmdPayload() {
 
             @Override
-            public byte getCommand() {
+            public byte getPacketType() {
                 return 0x6a;
             }
 
             @Override
             public Payload getPayload() {
-                return new Payload() {
+                return Payload.EMPTY_PAYLOAD;
+            }
 
-                    @Override
-                    public byte[] getData() {
-                        byte[] b = new byte[16];
-                        b[0] = 1;
-                        return b;
-                    }
-
-                };
+            @Override
+            public int getCommand() {
+                return 0x01;
             }
 
         });

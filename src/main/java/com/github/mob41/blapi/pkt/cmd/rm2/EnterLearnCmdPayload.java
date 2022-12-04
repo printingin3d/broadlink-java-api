@@ -33,32 +33,19 @@ import com.github.mob41.blapi.pkt.Payload;
 
 public final class EnterLearnCmdPayload implements CmdPayload {
 
-    private final Payload payload;
-
-    private final byte[] payloadBytes;
-
-    public EnterLearnCmdPayload() {
-        payloadBytes = new byte[16];
-        payloadBytes[0] = 0x03;
-
-        payload = new Payload() {
-
-            @Override
-            public byte[] getData() {
-                return payloadBytes;
-            }
-
-        };
-    }
-
     @Override
-    public byte getCommand() {
+    public byte getPacketType() {
         return 0x6a;
     }
 
     @Override
     public Payload getPayload() {
-        return payload;
+        return Payload.EMPTY_PAYLOAD;
+    }
+
+    @Override
+    public int getCommand() {
+        return 0x03;
     }
 
 }
