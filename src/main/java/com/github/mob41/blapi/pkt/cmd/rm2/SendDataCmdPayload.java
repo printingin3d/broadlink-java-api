@@ -36,21 +36,8 @@ public final class SendDataCmdPayload implements CmdPayload {
 
     private final Payload payload;
 
-    private final byte[] dataBytes;
-
     public SendDataCmdPayload(byte[] irRfCodeData) {
-        this.dataBytes = irRfCodeData;
-
         payload = new BytePayload(irRfCodeData);
-    }
-
-    /**
-     * Returns the IR/RF code data to be sent
-     * 
-     * @return IR/RF code data
-     */
-    public byte[] getData() {
-        return dataBytes;
     }
 
     @Override

@@ -30,6 +30,7 @@ package com.github.mob41.blapi;
 
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -47,11 +48,9 @@ public class DevicesTest {
 	@Test
 	@Ignore
 	public void testDevices() throws Exception {
-		BLDevice[] devs = BLDevice.discoverDevices(InetAddress.getByName("192.168.1.7"), 0, 0);
-		log.info("BLDevice returned " + devs.length + " number of devices.");
-		for (int i = 0; i < devs.length; i++) {
-			BLDevice dev = devs[i];
-
+		List<BLDevice> devs = BLDevice.discoverDevices(InetAddress.getByName("192.168.1.7"), 0, 0);
+		log.info("BLDevice returned " + devs.size() + " number of devices.");
+		for (BLDevice dev : devs) {
 			log.info("BLDevice mac is " + dev.getMac().getMacString());
 
 			dev.auth();

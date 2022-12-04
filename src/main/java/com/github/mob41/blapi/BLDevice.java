@@ -388,8 +388,8 @@ public abstract class BLDevice implements Closeable {
         }
 
         AuthCmdPayload sendPayload = new AuthCmdPayload();
-        log.debug("auth Sending CmdPacket with AuthCmdPayload: cmd=" + Integer.toHexString(sendPayload.getPacketType())
-                    + " len=" + sendPayload.getPayload().getData().length);
+        log.debug("auth Sending CmdPacket with AuthCmdPayload: cmd={} len={}", 
+                Integer.toHexString(sendPayload.getPacketType()), sendPayload.getPayload().getData().length);
 
         log.debug("auth AuthPayload initial bytes to send: {}", DatatypeConverter.printHexBinary(sendPayload.getPayload().getData()));
 
@@ -403,7 +403,7 @@ public abstract class BLDevice implements Closeable {
             return false;
         }
 
-        log.debug("auth recv encrypted data bytes (" + data.length +") after initial req: {}", DatatypeConverter.printHexBinary(data));
+        log.debug("auth recv encrypted data bytes ({}) after initial req: {}", data.length, DatatypeConverter.printHexBinary(data));
 
         byte[] payload = null;
         try {
@@ -411,7 +411,7 @@ public abstract class BLDevice implements Closeable {
 
             payload = decryptFromDeviceMessage(data);
 
-            log.debug("auth Decrypted. len=" + payload.length);
+            log.debug("auth Decrypted. len={}", payload.length);
 
         } catch (Exception e) {
             log.error("auth Received datagram decryption error. Aborting method", e);
@@ -419,11 +419,11 @@ public abstract class BLDevice implements Closeable {
             return false;
         }
 
-        log.debug("auth Packet received payload bytes: " + DatatypeConverter.printHexBinary(payload));
+        log.debug("auth Packet received payload bytes: {}", DatatypeConverter.printHexBinary(payload));
 
         key = subbytes(payload, 0x04, 0x14);
 
-        log.debug("auth Packet received key bytes: " + DatatypeConverter.printHexBinary(key));
+        log.debug("auth Packet received key bytes: {}", DatatypeConverter.printHexBinary(key));
 
         if (key.length % 16 != 0) {
             log.error("auth Received key len is not a multiple of 16! Aborting");
@@ -436,7 +436,7 @@ public abstract class BLDevice implements Closeable {
 
         id = subbytes(payload, 0x00, 0x04);
 
-        log.debug("auth Packet received id bytes: " + DatatypeConverter.printHexBinary(id) + " with ID len=" + id.length);
+        log.debug("auth Packet received id bytes: {} with ID len={}", DatatypeConverter.printHexBinary(id), id.length);
 
         log.debug("auth End of authentication method");
         alreadyAuthorized = true;
@@ -624,7 +624,7 @@ public abstract class BLDevice implements Closeable {
      * @throws IOException
      *             Problems when discovering
      */
-    public static BLDevice[] discoverDevices() throws IOException {
+    public static List<BLDevice> discoverDevices() throws IOException {
         return discoverDevices(DEFAULT_TIMEOUT);
     }
 
@@ -637,7 +637,7 @@ public abstract class BLDevice implements Closeable {
      * @throws IOException
      *             Problems when discovering
      */
-    public static BLDevice[] discoverDevices(int timeout) throws IOException {
+    public static List<BLDevice> discoverDevices(int timeout) throws IOException {
         return discoverDevices(InetAddress.getLocalHost(), 0, timeout);
     }
 
@@ -655,7 +655,7 @@ public abstract class BLDevice implements Closeable {
      * @throws IOException
      *             Problems when discovering
      */
-    public static BLDevice[] discoverDevices(InetAddress sourceIpAddr, int sourcePort, int timeout) throws IOException {
+    public static List<BLDevice> discoverDevices(InetAddress sourceIpAddr, int sourcePort, int timeout) throws IOException {
         log.debug("Discovering devices");
 
         List<BLDevice> devices = new ArrayList<>(50);
@@ -693,8 +693,7 @@ public abstract class BLDevice implements Closeable {
                 Mac mac = new Mac(subbytes(receBytes, 0x3a, 0x40));
                 short deviceType = (short) (receBytes[0x34] | receBytes[0x35] << 8);
     
-                log.debug("Info: host=" + host + " mac=" + mac.getMacString() + " deviceType=0x"
-                        + Integer.toHexString(deviceType));
+                log.debug("Info: host={} mac={} deviceType=0x", host, mac.getMacString(), Integer.toHexString(deviceType));
                 log.debug("Creating BLDevice instance");
     
                 BLDevice inst = createInstance(deviceType, host, mac);
@@ -707,7 +706,7 @@ public abstract class BLDevice implements Closeable {
                     log.debug("Cannot create instance, returned null, not adding to found devices list");
                 }
             } else {
-                log.debug("A timeout of " + timeout + " ms was set. Running loop");
+                log.debug("A timeout of {} ms was set. Running loop", timeout);
     
                 long startTime = System.currentTimeMillis();
                 long elapsed;
@@ -733,8 +732,7 @@ public abstract class BLDevice implements Closeable {
                     Mac mac = new Mac(reverseBytes(subbytes(receBytes, 0x3a, 0x40)));
                     short deviceType = (short) (receBytes[0x34] | receBytes[0x35] << 8);
     
-                    log.debug("Info: host=" + host + " mac=" + mac.getMacString() + " deviceType=0x"
-                            + Integer.toHexString(deviceType));
+                    log.debug("Info: host={} mac={} deviceType=0x{}", host, mac.getMacString(), Integer.toHexString(deviceType));
                     log.debug("Creating BLDevice instance");
     
                     BLDevice inst = createInstance(deviceType, host, mac);
@@ -744,22 +742,14 @@ public abstract class BLDevice implements Closeable {
     
                         devices.add(inst);
                     } else {
-                        log.debug("Cannot create instance, returned null, not adding to found devices list");
+                        log.warn("Cannot create instance, returned null, not adding to found devices list");
                     }
                 }
             }
     
-            log.debug("Converting list to array: " + devices.size());
-    
-            BLDevice[] out = new BLDevice[devices.size()];
-    
-            for (int i = 0; i < out.length; i++) {
-                out[i] = devices.get(i);
-            }
-    
-            log.debug("End of device discovery: " + out.length);
+            log.debug("Discovered {} devices", devices.size());
             
-            return out;
+            return devices;
         }
     }
     
@@ -986,12 +976,11 @@ public abstract class BLDevice implements Closeable {
         } else {
             boundHost = sock.getInetAddress().getHostAddress();
         }
-    	log.debug("sendPkt - call with given sock for " + boundHost + " and port " + sock.getPort());
+    	log.debug("sendPkt - call with given sock for {} and port {}", boundHost, sock.getPort());
 
         byte[] data = pkt.getData();
         DatagramPacket sendpack = new DatagramPacket(data, data.length, destIpAddr, destPort);
-        log.debug("snedPkt - data for length: " + data.length + " to: " + sendpack.getAddress().getHostAddress() + " for port: " + sendpack.getPort());
-
+        log.debug("snedPkt - data for length: {} to: {} for port: {}", data.length, sendpack.getAddress().getHostAddress(), sendpack.getPort());
         byte[] rece = new byte[bufSize];
         DatagramPacket recepack = new DatagramPacket(rece, 0, rece.length);
 
@@ -1012,7 +1001,7 @@ public abstract class BLDevice implements Closeable {
             }
         }
 
-        log.debug("sendPkt - recv data bytes (" + recepack.getData().length +") after initial req: {}", DatatypeConverter.printHexBinary(recepack.getData()));
+        log.debug("sendPkt - recv data bytes ({}) after initial req: {}", recepack.getData().length, DatatypeConverter.printHexBinary(recepack.getData()));
         recepack.setData(removeNullsFromEnd(recepack.getData(), 0));
         return recepack;
     }
