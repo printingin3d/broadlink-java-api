@@ -29,7 +29,6 @@
 
 package com.github.mob41.blapi;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 
 import javax.xml.bind.DatatypeConverter;
@@ -40,8 +39,8 @@ import com.github.mob41.blapi.pkt.Payload;
 
 public class SP1Device extends BLDevice {
 
-    public SP1Device(String host, Mac mac) throws IOException {
-        super(BLDevice.DEV_SP1, BLDevice.DESC_SP1, host, mac);
+    public SP1Device(short deviceType, String deviceDesc, String host, Mac mac) {
+        super(deviceType, deviceDesc, host, mac);
     }
 
     public void setPower(final boolean state) throws Exception {

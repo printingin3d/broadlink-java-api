@@ -29,8 +29,6 @@
 
 package com.github.mob41.blapi.dev.hysen;
 
-import java.io.IOException;
-
 import javax.xml.bind.DatatypeConverter;
 
 import com.github.mob41.blapi.BLDevice;
@@ -63,13 +61,12 @@ public class BaseHysenDevice extends BLDevice {
      *            The target Broadlink hostname
      * @param mac
      *            The target Broadlink MAC address
-     * @throws IOException
-     *             Problems on constructing socket
      */
-    protected BaseHysenDevice(short deviceType, String deviceDesc, String host, Mac mac) throws IOException {
+    protected BaseHysenDevice(short deviceType, String deviceDesc, String host, Mac mac) {
         super(deviceType, deviceDesc, host, mac);
     }
 
+    @Override
     public byte[] decryptFromDeviceMessage(byte[] encData) throws Exception {
         return super.decryptFromDeviceMessage(encData);
     }
@@ -116,6 +113,10 @@ public class BaseHysenDevice extends BLDevice {
      * loop_mode = 2 ("1234567") means every day (including Saturday and Sunday)
      * follows the "weekday" schedule
      * 
+     * @param autoMode auto (scheduled/timed) mode
+     * @param loopMode controls weekends/weekdays
+     * @param sensorControl internal or external sensor
+     * 
      * @throws Exception If I/O goes wrong
      */
     public void setMode(boolean autoMode, LoopMode loopMode, SensorControl sensorControl) throws Exception {
@@ -130,6 +131,9 @@ public class BaseHysenDevice extends BLDevice {
      * ("12345,67") means Saturday and Sunday follow the "weekend" schedule
      * loop_mode = 2 ("1234567") means every day (including Saturday and Sunday)
      * follows the "weekday" schedule
+     * 
+     * @param autoMode auto (scheduled/timed) mode
+     * @param loopMode controls weekends/weekdays
      * 
      * @throws Exception If I/O goes wrong
      */

@@ -54,24 +54,9 @@ public class RM2Device extends BLDevice {
      * @param deviceDesc Friendly device description
      * @param host The target Broadlink hostname
      * @param mac The target Broadlink MAC address
-     * @throws IOException Problems on constructing socket
      */
-	protected RM2Device(short deviceType, String deviceDesc, String host, Mac mac) throws IOException{
+	public RM2Device(short deviceType, String deviceDesc, String host, Mac mac) {
         super(deviceType, deviceDesc, host, mac);
-    }
-
-    /**
-     * Creates a RM2Device client instance
-     * 
-     * @param host
-     *            The target Broadlink hostname
-     * @param mac
-     *            The target Broadlink MAC address
-     * @throws IOException
-     *             Problems on constructing socket
-     */
-    public RM2Device(String host, Mac mac) throws IOException {
-        super(BLDevice.DEV_RM_2, BLDevice.DESC_RM_2, host, mac);
     }
 
     /**
@@ -80,7 +65,7 @@ public class RM2Device extends BLDevice {
      * The {@link #auth() auth()} method must be ran before these commands
      * 
      * @return Result whether the command is successfully sent.
-     * @throws IOException
+     * @throws Exception
      *             Problems on sending packet
      */
     public byte[] checkData() throws Exception {
@@ -96,7 +81,7 @@ public class RM2Device extends BLDevice {
         if (err == 0) {
             byte[] encData = decryptFromDeviceMessage(data);
 
-            return subbytes(encData, 0x04, encData.length);
+            return subbytes(encData, 0x06, encData.length);
         }
 
         log.warn("RM2 check data received error: " + Integer.toHexString(err) + " / " + err);

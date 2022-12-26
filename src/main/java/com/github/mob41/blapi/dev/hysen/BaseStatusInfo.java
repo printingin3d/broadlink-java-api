@@ -122,7 +122,7 @@ public class BaseStatusInfo {
      * schedule loop_mode = 2 ("1234567") means every day (including Saturday and
      * Sunday) follows the "weekday" schedule
      * 
-     * @return
+     * @return loopMode
      */
     public LoopMode getLoopMode() {
         return loopMode;
@@ -137,7 +137,7 @@ public class BaseStatusInfo {
      * 
      * default: 0:internal sensor
      * 
-     * @return
+     * @return Sensor control enum
      */
     public SensorControl getSensorControl() {
         return sensorControl;
@@ -150,6 +150,7 @@ public class BaseStatusInfo {
      * 
      * default: 42ºC
      * 
+     * @return osv 
      */
 
     public short getOsv() {
@@ -164,7 +165,7 @@ public class BaseStatusInfo {
      * 
      * default: 2ºC
      * 
-     * @return
+     * @return the difference in Celsius
      */
     public short getDif() {
         return dif;
@@ -178,7 +179,7 @@ public class BaseStatusInfo {
      * 
      * default: 35ºC
      * 
-     * @return
+     * @return upper limit in Celsius
      */
     public short getSvh() {
         return svh;
@@ -191,7 +192,7 @@ public class BaseStatusInfo {
      * 
      * default: 5ºC
      * 
-     * @return
+     * @return lower limit in Celsius
      */
     public short getSvl() {
         return svl;
@@ -204,7 +205,7 @@ public class BaseStatusInfo {
      * 
      * 0.1ºC precision Calibration (actual temperature)
      * 
-     * @return
+     * @return adjustment in Celsius
      */
     public double getRoomTempAdjustment() {
         return roomTempAdjustment;
@@ -219,7 +220,7 @@ public class BaseStatusInfo {
      * 
      * 00:anti-freezing function shut down
      * 
-     * @return
+     * @return anti-freezing enum
      */
     public AntiFreezing getAntiFreezing() {
         return antiFreezing;
@@ -234,7 +235,7 @@ public class BaseStatusInfo {
      * 
      * default: 00:Power on no need memory
      * 
-     * @return
+     * @return PowerOnMemory enum
      */
     public PowerOnMemory getPowerOnMemory() {
         return powerOnMemory;
@@ -249,7 +250,7 @@ public class BaseStatusInfo {
      * 
      * default: 08
      * 
-     * @return
+     * @return Factory default ?
      */
     public short getFac() {
         return fac;

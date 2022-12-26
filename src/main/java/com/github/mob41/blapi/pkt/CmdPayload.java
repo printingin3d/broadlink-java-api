@@ -30,10 +30,7 @@ package com.github.mob41.blapi.pkt;
 
 public interface CmdPayload {
     byte getPacketType();
-    /**
-     * if returned value less than zero the payload sent without any change
-     * @return
-     */
+
     int getCommand();
 
     Payload getPayload();

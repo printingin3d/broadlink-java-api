@@ -29,8 +29,6 @@
 
 package com.github.mob41.blapi;
 
-import java.io.IOException;
-
 import com.github.mob41.blapi.dev.hysen.BaseHysenDevice;
 import com.github.mob41.blapi.mac.Mac;
 
@@ -39,12 +37,13 @@ public class HysenDevice extends BaseHysenDevice {
     /**
      * Creates a HysenDevice client instance
      * 
+     * @param deviceType Device Type
+     * @param deviceDesc Friendly device description
      * @param host The target Broadlink hostname
      * @param mac  The target Broadlink MAC address
-     * @throws IOException Problems on constructing socket
      */
-    public HysenDevice(String host, Mac mac) throws IOException {
-        super(BLDevice.DEV_HYSEN, BLDevice.DESC_HYSEN, host, mac);
+    public HysenDevice(short deviceType, String deviceDesc, String host, Mac mac) {
+        super(deviceType, deviceDesc, host, mac);
     }
 
 }

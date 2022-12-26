@@ -45,38 +45,23 @@ public class MP1Device extends BLDevice {
      * @param deviceDesc Friendly device description
      * @param host The target Broadlink hostname
      * @param mac The target Broadlink MAC address
-     * @throws IOException Problems on constructing socket
      */
-    protected MP1Device(short deviceType, String deviceDesc, String host, Mac mac) throws IOException{
+    public MP1Device(short deviceType, String deviceDesc, String host, Mac mac) {
         super(deviceType, deviceDesc, host, mac);
-    }
-    
-    /**
-     * Creates a MP1Device client instance
-     * 
-     * @param host
-     *            The target Broadlink hostname
-     * @param mac
-     *            The target Broadlink MAC address
-     * @throws IOException
-     *             Problems on constructing socket
-     */
-    public MP1Device(String host, Mac mac) throws IOException {
-        super(BLDevice.DEV_MP1, BLDevice.DESC_MP1, host, mac);
     }
 
     /**
      * Set the power state
      * @param sid The SID
      * @param state Power State
-     * @throws Exception
+     * @throws IOException Problems when sending the packet
      */
-    public void setState(int sid, boolean state) throws Exception {
+    public void setState(int sid, boolean state) throws IOException {
         int sid_mask = 0x01 << (sid - 1);
         setStateMask(sid_mask, state);
     }
 
-    private void setStateMask(final int sid_mask, final boolean state) throws Exception {
+    private void setStateMask(final int sid_mask, final boolean state) throws IOException {
         // """Sets the power state of the smart power strip."""
         DatagramPacket packet = sendCmdPkt(new CmdPayload() {
 

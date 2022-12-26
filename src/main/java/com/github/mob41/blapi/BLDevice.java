@@ -33,18 +33,22 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.mob41.blapi.ex.BLApiRuntimeException;
 import com.github.mob41.blapi.mac.Mac;
 import com.github.mob41.blapi.pkt.CmdPacket;
 import com.github.mob41.blapi.pkt.CmdPayload;
@@ -80,129 +84,76 @@ public abstract class BLDevice implements Closeable {
 
     public static final int DEFAULT_BYTES_SIZE = 0x38; // 56-bytes
 
-    // Devices type HEX
-
-    public static final short DEV_SP1 = 0x0;
-
-    public static final short DEV_SP2 = 0x2711;
-
-    public static final short DEV_SP2_HONEYWELL_ALT1 = 0x2719;
-
-    public static final short DEV_SP2_HONEYWELL_ALT2 = 0x7919;
-
-    public static final short DEV_SP2_HONEYWELL_ALT3 = 0x271a;
-
-    public static final short DEV_SP2_HONEYWELL_ALT4 = 0x791a;
-
-    public static final short DEV_SPMINI = 0x2720;
-
-    public static final short DEV_SP3 = 0x753e;
-
-    public static final short DEV_SPMINI2 = 0x2728;
-
-    public static final short DEV_SPMINI_OEM_ALT1 = 0x2733;
-
-    public static final short DEV_SPMINI_OEM_ALT2 = 0x273e;
-
-    public static final short DEV_SPMINI_PLUS = 0x2736;
-
-    public static final short DEV_RM_2 = 0x2712;
-
-    public static final short DEV_RM_MINI = 0x2737;
-
-    public static final short DEV_RM_MINI_3 = 0x27c2;
-
-    public static final short DEV_RM_PRO_PHICOMM = 0x273d;
-
-    public static final short DEV_RM_2_HOME_PLUS = 0x2783;
-
-    public static final short DEV_RM_2_2HOME_PLUS_GDT = 0x277c;
-
-    public static final short DEV_RM_2_PRO_PLUS = 0x272a;
-
-    public static final short DEV_RM_2_PRO_PLUS_2 = 0x2787;
-
-    public static final short DEV_RM_2_PRO_PLUS_2_BL = 0x278b;
-
-    public static final short DEV_RM_MINI_SHATE = 0x278f;
-
-    public static final short DEV_A1 = 0x2714;
-
-    public static final short DEV_MP1 = 0x4EB5;
+    private static interface BLDeviceCreator {
+        BLDevice create(short deviceType, String desc, String host, Mac mac);
+    }
     
-    public static final short DEV_HYSEN = 0x4EAD;
+    private static class ConfigItem {
+        private final short deviceType;
+        private final String desc;
+        private final BLDeviceCreator creator;
+        
+        public ConfigItem(short deviceType, String desc, BLDeviceCreator creator) {
+            this.deviceType = deviceType;
+            this.desc = desc;
+            this.creator = creator;
+        }
 
-    public static final short DEV_FLOUREON = 0xffffffad;
-
-    //
-    // Friendly device description
-    //
-    // Notice: Developers are not recommended to use device description as device identifiers.
-    //         Instead, developers are advised to use Device Type Hex numbers.
+        public Stream<BLDevice> createIfMatch(short deviceType, String host, Mac mac) {
+            if (this.deviceType == deviceType) {
+                BLDevice dev = creator.create(deviceType, desc, host, mac);
+                return Stream.of(dev);
+            }
+            return Stream.empty();
+        }
+    }
     
-    //Unknown
+    private static final List<ConfigItem> CONFIG = Arrays.asList(
+            new ConfigItem((short)0x0, "Smart Plug V1", SP1Device::new),
+            new ConfigItem((short)0x2711, "Smart Plug V2", SP2Device::new),
+            new ConfigItem((short)0x2719, "Smart Plug Honeywell", SP2Device::new),
+            new ConfigItem((short)0x7919, "Smart Plug Honeywell", SP2Device::new),
+            new ConfigItem((short)0x271a, "Smart Plug Honeywell", SP2Device::new),
+            new ConfigItem((short)0x791a, "Smart Plug Honeywell", SP2Device::new),
+            new ConfigItem((short)0x2720, "Smart Plug Mini", SP2Device::new),
+            new ConfigItem((short)0x753e, "Smart Plug V3", SP2Device::new),
+            new ConfigItem((short)0x2728, "Smart Plug Mini V2", SP2Device::new),
+            new ConfigItem((short)0x2733, "Smart Plug OEM", SP2Device::new),
+            new ConfigItem((short)0x273e, "Smart Plug OEM", SP2Device::new),
+            new ConfigItem((short)0x2736, "Smart Plug Mini Plus", SP2Device::new),
+            new ConfigItem((short)0x2712, "RM 2", RM2Device::new),
+            new ConfigItem((short)0x2737, "RM Mini", RM2Device::new),
+            new ConfigItem((short)0x27c2, "RM Mini 3", RM2Device::new),
+            new ConfigItem((short)0x273d, "RM Pro", RM2Device::new),
+            new ConfigItem((short)0x2783, "RM 2 Home Plus", RM2Device::new),
+            new ConfigItem((short)0x277c, "RM 2 Home Plus GDT", RM2Device::new),
+            new ConfigItem((short)0x272a, "RM 2 Pro Plus", RM2Device::new),
+            new ConfigItem((short)0x2787, "RM 2 Pro Plus 2", RM2Device::new),
+            new ConfigItem((short)0x278b, "RM 2 Pro Plus 2 BL", RM2Device::new),
+            new ConfigItem((short)0x278f, "RM Mini SHATE", RM2Device::new),
+            new ConfigItem((short)0x2714, "Environmental Sensor", A1Device::new),
+            new ConfigItem((short)0x4EB5, "Power Strip", MP1Device::new),
+            new ConfigItem((short)0xffad, "Floureon Thermostat", FloureonDevice::new),
+            new ConfigItem((short)0x4ead, "Hysen Thermostat", HysenDevice::new),
+            new ConfigItem((short)0x51DA, "RM4 mini", RM4Device::new),
+            new ConfigItem((short)0x5209, "RM4 TV mate", RM4Device::new),
+            new ConfigItem((short)0x520C, "RM4 mini", RM4Device::new),
+            new ConfigItem((short)0x520D, "RM4C mini", RM4Device::new),
+            new ConfigItem((short)0x5211, "RM4C mate", RM4Device::new),
+            new ConfigItem((short)0x5212, "RM4 TV mate", RM4Device::new),
+            new ConfigItem((short)0x5216, "RM4 mini", RM4Device::new),
+            new ConfigItem((short)0x521C, "RM4 mini", RM4Device::new),
+            new ConfigItem((short)0x6070, "RM4C mini", RM4Device::new),
+            new ConfigItem((short)0x610E, "RM4 mini", RM4Device::new),
+            new ConfigItem((short)0x610F, "RM4C mini", RM4Device::new),
+            new ConfigItem((short)0x62BC, "RM4 mini", RM4Device::new),
+            new ConfigItem((short)0x62BE, "RM4C mini", RM4Device::new),
+            new ConfigItem((short)0x6364, "RM4S", RM4Device::new),
+            new ConfigItem((short)0x648D, "RM4 mini", RM4Device::new),
+            new ConfigItem((short)0x6539, "RM4C mini", RM4Device::new),
+            new ConfigItem((short)0x653A, "RM4 mini", RM4Device::new)
+    );
     
-    public static final String DESC_UNKNOWN = "Unknown Device";
-    
-    //RM Series
-
-    public static final String DESC_RM_2 = "RM 2";
-
-    public static final String DESC_RM_MINI = "RM Mini";
-
-    public static final String DESC_RM_MINI_3 = "RM Mini 3";
-
-    public static final String DESC_RM_PRO_PHICOMM = "RM Pro";
-
-    public static final String DESC_RM_2_HOME_PLUS = "RM 2 Home Plus";
-
-    public static final String DESC_RM_2_2HOME_PLUS_GDT = "RM 2 Home Plus GDT";
-
-    public static final String DESC_RM_2_PRO_PLUS = "RM 2 Pro Plus";
-
-    public static final String DESC_RM_2_PRO_PLUS_2 = "RM 2 Pro Plus 2";
-
-    public static final String DESC_RM_2_PRO_PLUS_2_BL = "RM 2 Pro Plus 2 BL";
-
-    public static final String DESC_RM_MINI_SHATE = "RM Mini SHATE";
-    
-    //A Series
-
-    public static final String DESC_A1 = "Environmental Sensor";
-    
-    //MP Series
-
-    public static final String DESC_MP1 = "Power Strip";
-    
-    //SP Series
-
-    public static final String DESC_SP1 = "Smart Plug V1";
-
-    public static final String DESC_SP2 = "Smart Plug V2";
-
-    public static final String DESC_SP2_HONEYWELL_ALT1 = "Smart Plug Honeywell Alt 1";
-
-    public static final String DESC_SP2_HONEYWELL_ALT2 = "Smart Plug Honeywell Alt 2";
-
-    public static final String DESC_SP2_HONEYWELL_ALT3 = "Smart Plug Honeywell Alt 3";
-
-    public static final String DESC_SP2_HONEYWELL_ALT4 = "Smart Plug Honeywell Alt 4";
-
-    public static final String DESC_SPMINI = "Smart Plug Mini";
-
-    public static final String DESC_SP3 = "Smart Plug V3";
-
-    public static final String DESC_SPMINI2 = "Smart Plug Mini V2";
-
-    public static final String DESC_SPMINI_OEM_ALT1 = "Smart Plug OEM Alt 1";
-
-    public static final String DESC_SPMINI_OEM_ALT2 = "Smart Plug OEM Alt 2";
-
-    public static final String DESC_SPMINI_PLUS = "Smart Plug Mini Plus";
-
-    public static final String DESC_HYSEN = "Hysen Thermostat";
-
-    public static final String DESC_FLOUREON = "Floureon Thermostat";
     /**
      * The destination port for discovery broadcasting (from __init__.py)
      */
@@ -293,10 +244,8 @@ public abstract class BLDevice implements Closeable {
      *            Hostname of target Broadlink device
      * @param mac
      *            MAC address of target Broadlink device
-     * @throws IOException
-     *             Problems on constructing a datagram socket
      */
-    protected BLDevice(short deviceType, String deviceDesc, String host, Mac mac) throws IOException {
+    protected BLDevice(short deviceType, String deviceDesc, String host, Mac mac) {
         key = INITIAL_KEY;
         iv = INITIAL_IV;
         id = new byte[] { 0, 0, 0, 0 };
@@ -309,9 +258,13 @@ public abstract class BLDevice implements Closeable {
         this.host = host;
         this.mac = mac;
 
-        sock = new DatagramSocket();
-        sock.setReuseAddress(true);
-        sock.setBroadcast(true);
+        try {
+            sock = new DatagramSocket();
+            sock.setReuseAddress(true);
+            sock.setBroadcast(true);
+        } catch (SocketException e) {
+            throw new BLApiRuntimeException(e);
+        }
         aes = new AES(iv, key);
         alreadyAuthorized = false;
     }
@@ -554,66 +507,12 @@ public abstract class BLDevice implements Closeable {
      * @param mac
      *            Target Broadlink device MAC address
      * @return A BLDevice client
-     * @throws IOException
-     *             Problems when constucting a datagram socket
      */
-    public static BLDevice createInstance(short deviceType, String host, Mac mac) throws IOException {
-        String desc = BLDevice.getDescOfType(deviceType);
-        switch (deviceType) {
-        case DEV_SP1:
-            return new SP1Device(host, mac);
-        case DEV_SP2:
-        case DEV_SP2_HONEYWELL_ALT1:
-        case DEV_SP2_HONEYWELL_ALT2:
-        case DEV_SP2_HONEYWELL_ALT3:
-        case DEV_SP2_HONEYWELL_ALT4:
-        case DEV_SPMINI:
-        case DEV_SP3:
-        case DEV_SPMINI2:
-        case DEV_SPMINI_OEM_ALT1:
-        case DEV_SPMINI_OEM_ALT2:
-        case DEV_SPMINI_PLUS:
-            return new SP2Device(deviceType, desc, host, mac);
-        case DEV_RM_2:
-        case DEV_RM_MINI:
-        case DEV_RM_MINI_3:
-            return new RM2Device(deviceType, desc, host, mac);
-        case DEV_RM_PRO_PHICOMM:
-        case DEV_RM_2_HOME_PLUS:
-        case DEV_RM_2_2HOME_PLUS_GDT:
-        case DEV_RM_2_PRO_PLUS:
-        case DEV_RM_2_PRO_PLUS_2:
-        case DEV_RM_2_PRO_PLUS_2_BL:
-        case DEV_RM_MINI_SHATE:
-            return new RM2Device(deviceType, desc, host, mac);
-        case DEV_A1:
-            return new A1Device(host, mac);
-        case DEV_MP1:
-            return new MP1Device(host, mac);
-        case DEV_FLOUREON:
-            return new FloureonDevice(host, mac);
-        case DEV_HYSEN:
-            return new HysenDevice(host, mac);
-        case 0x51DA:
-        case 0x5209:
-        case 0x520C:
-        case 0x520D:
-        case 0x5211:
-        case 0x5212:
-        case 0x5216:
-        case 0x521C:
-        case 0x6070:
-        case 0x610E:
-        case 0x610F:
-        case 0x62BC:
-        case 0x62BE:
-        case 0x6364:
-        case 0x648D:
-        case 0x6539:
-        case 0x653A:
-            return new RM4Device(deviceType, desc, host, mac);
-        }
-        return null;
+    public static BLDevice createInstance(short deviceType, String host, Mac mac) {
+        return CONFIG.stream()
+                .flatMap(c -> c.createIfMatch(deviceType, host, mac))
+                .findAny()
+                .orElseThrow(() -> new BLApiRuntimeException("Cannot found deviceType: "+deviceType));
     }
 
     /**
@@ -750,79 +649,6 @@ public abstract class BLDevice implements Closeable {
             log.debug("Discovered {} devices", devices.size());
             
             return devices;
-        }
-    }
-    
-    public static String getDescOfType(short devType){
-        switch (devType) {
-        
-        //
-        // RM Series
-        //
-        
-        case BLDevice.DEV_RM_2:
-            return DESC_RM_2;
-        case BLDevice.DEV_RM_MINI:
-            return DESC_RM_MINI;
-        case BLDevice.DEV_RM_MINI_3:
-            return DESC_RM_MINI_3;
-        case BLDevice.DEV_RM_PRO_PHICOMM:
-            return DESC_RM_PRO_PHICOMM;
-        case BLDevice.DEV_RM_2_HOME_PLUS:
-            return DESC_RM_2_HOME_PLUS;
-        case BLDevice.DEV_RM_2_2HOME_PLUS_GDT:
-            return DESC_RM_2_2HOME_PLUS_GDT;
-        case BLDevice.DEV_RM_2_PRO_PLUS:
-            return DESC_RM_2_PRO_PLUS;
-        case BLDevice.DEV_RM_2_PRO_PLUS_2:
-            return DESC_RM_2_PRO_PLUS_2;
-        case BLDevice.DEV_RM_2_PRO_PLUS_2_BL:
-            return DESC_RM_2_PRO_PLUS_2_BL;
-        case BLDevice.DEV_RM_MINI_SHATE:
-            return DESC_RM_MINI_SHATE;
-        
-        //
-        // SP2 Series
-        //
-
-        case BLDevice.DEV_SP2:
-            return DESC_SP2;
-        case BLDevice.DEV_SP2_HONEYWELL_ALT1:
-            return DESC_SP2_HONEYWELL_ALT1;
-        case BLDevice.DEV_SP2_HONEYWELL_ALT2:
-            return DESC_SP2_HONEYWELL_ALT2;
-        case BLDevice.DEV_SP2_HONEYWELL_ALT3:
-            return DESC_SP2_HONEYWELL_ALT3;
-        case BLDevice.DEV_SP2_HONEYWELL_ALT4:
-            return DESC_SP2_HONEYWELL_ALT4;
-        case BLDevice.DEV_SP3:
-            return DESC_SP3;
-        case BLDevice.DEV_SPMINI:
-            return DESC_SPMINI;
-        case BLDevice.DEV_SPMINI2:
-            return DESC_SPMINI2;
-        case BLDevice.DEV_SPMINI_OEM_ALT1:
-            return DESC_SPMINI_OEM_ALT1;
-        case BLDevice.DEV_SPMINI_OEM_ALT2:
-            return DESC_SPMINI_OEM_ALT2;
-        case BLDevice.DEV_SPMINI_PLUS:
-            return DESC_SPMINI_PLUS;
-
-        case BLDevice.DEV_SP1:
-        	return BLDevice.DESC_SP1;
-        case BLDevice.DEV_MP1:
-        	return BLDevice.DESC_MP1;
-        case BLDevice.DEV_A1:
-        	return BLDevice.DESC_A1;
-        case BLDevice.DEV_HYSEN:
-            return BLDevice.DESC_HYSEN;
-        case BLDevice.DEV_FLOUREON:
-            return BLDevice.DESC_FLOUREON;
-        //
-        // Unregonized
-        //
-        default:
-            return DESC_UNKNOWN;
         }
     }
 

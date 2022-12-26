@@ -25,14 +25,16 @@
          - Anthony Law (mob41) - Initial API Implementation
          - bwssytems
          - Christian Fischer (computerlyrik)
+         - Ivan Suller - adding RM4Device
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.mob41.blapi</groupId>
+  <groupId>eu.printingin3d.blapi</groupId>
   <artifactId>broadlink-java-api</artifactId>
   <packaging>jar</packaging>
+  <version>1.0.2</version>
 
   <name>broadlink-java-api</name>
   <description>A clean, hacked Broadlink API for Java</description>
@@ -55,9 +57,9 @@
   </developers>
   
   <scm>
-    <connection>scm:git:git://github.com/mob41/broadlink-java-api.git</connection>
-    <developerConnection>scm:git:ssh://github.com:mob41/broadlink-java-api.git</developerConnection>
-    <url>http://github.com/mob41/broadlink-java-api/tree/master</url>
+    <connection>scm:git:git://github.com/printingin3d/broadlink-java-api.git</connection>
+    <developerConnection>scm:git:ssh://github.com:printingin3d/broadlink-java-api.git</developerConnection>
+    <url>http://github.com/printingin3d/broadlink-java-api/tree/master</url>
   </scm>
     
   <distributionManagement>
@@ -153,6 +155,4 @@
         </plugin>
     </plugins>
   </build>
-    
-  <version>1.0.1</version>
 </project>

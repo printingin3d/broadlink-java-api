@@ -41,14 +41,11 @@ import com.github.mob41.blapi.mac.Mac;
  * @author Anthony
  *
  */
+@Deprecated
 public class RMDevice extends RM2Device {
 
     public RMDevice(short deviceType, String deviceDesc, String host, Mac mac) throws IOException {
         super(deviceType, deviceDesc, host, mac);
-    }
-
-    public RMDevice(String host, Mac mac) throws IOException {
-        super(host, mac);
     }
 
 }

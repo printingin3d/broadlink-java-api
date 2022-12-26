@@ -1,6 +1,5 @@
 package com.github.mob41.blapi;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -9,7 +8,7 @@ import com.github.mob41.blapi.pkt.CmdPayload;
 
 public class RM4Device extends RM2Device {
 
-    protected RM4Device(short deviceType, String deviceDesc, String host, Mac mac) throws IOException {
+    protected RM4Device(short deviceType, String deviceDesc, String host, Mac mac) {
         super(deviceType, deviceDesc, host, mac);
     }
     
