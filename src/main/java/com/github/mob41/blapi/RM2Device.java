@@ -33,6 +33,7 @@ import java.net.DatagramPacket;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.github.mob41.blapi.ex.BLApiErrorResponseException;
 import com.github.mob41.blapi.mac.Mac;
 import com.github.mob41.blapi.pkt.CmdPayload;
 import com.github.mob41.blapi.pkt.cmd.rm2.CheckDataCmdPayload;
@@ -84,8 +85,7 @@ public class RM2Device extends BLDevice {
             return subbytes(encData, 0x06, encData.length);
         }
 
-        log.warn("RM2 check data received error: " + Integer.toHexString(err) + " / " + err);
-        return null;
+        throw new BLApiErrorResponseException("check data", err);
     }
 
     public void sendData(byte[] input) throws IOException {
@@ -99,7 +99,7 @@ public class RM2Device extends BLDevice {
         log.debug("RM2 check data received encrypted bytes: " + DatatypeConverter.printHexBinary(data));
 
         if (err != 0) {
-            log.warn("RM2 check data received error: " + Integer.toHexString(err) + " / " + err);
+            throw new BLApiErrorResponseException("send data", err);
         }
     }
     
@@ -124,8 +124,7 @@ public class RM2Device extends BLDevice {
         	return true;
         }
         
-        log.warn("RM2 enter learning received error: " + Integer.toHexString(err) + " / " + err);
-        return false;
+        throw new BLApiErrorResponseException("enter learning", err);
     }
 
     /**
@@ -149,11 +148,8 @@ public class RM2Device extends BLDevice {
             log.debug("RM2 get temp received bytes (decrypted): " + DatatypeConverter.printHexBinary(pl));
 
             return (pl[0x4] * 10 + pl[0x5]) / 10.0;
-        } else {
-            log.warn("RM2 get temp received error: " + Integer.toHexString(err) + " / " + err);
         }
-
-        return -1;
+        throw new BLApiErrorResponseException("get temp", err);
     }
 
 }
