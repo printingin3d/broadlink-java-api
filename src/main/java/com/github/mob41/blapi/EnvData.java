@@ -30,27 +30,27 @@ package com.github.mob41.blapi;
 
 public class EnvData {
     
-    public static final byte LIGHT_DARK = 0x00;
+    private static final byte LIGHT_DARK = 0x00;
     
-    public static final byte LIGHT_DIM = 0x01;
+    private static final byte LIGHT_DIM = 0x01;
     
-    public static final byte LIGHT_NORMAL = 0x02;
+    private static final byte LIGHT_NORMAL = 0x02;
     
-    public static final byte LIGHT_BRIGHT = 0x03;
+    private static final byte LIGHT_BRIGHT = 0x03;
     
-    public static final byte AIR_QUALITY_EXCELLENT = 0x00;
+    private static final byte AIR_QUALITY_EXCELLENT = 0x00;
     
-    public static final byte AIR_QUALITY_GOOD = 0x01;
+    private static final byte AIR_QUALITY_GOOD = 0x01;
     
-    public static final byte AIR_QUALITY_NORMAL = 0x02;
+    private static final byte AIR_QUALITY_NORMAL = 0x02;
     
-    public static final byte AIR_QUALITY_BAD = 0x03;
+    private static final byte AIR_QUALITY_BAD = 0x03;
     
-    public static final byte NOISE_QUIET = 0x00;
+    private static final byte NOISE_QUIET = 0x00;
     
-    public static final byte NOISE_NORMAL = 0x01;
+    private static final byte NOISE_NORMAL = 0x01;
     
-    public static final byte NOISE_NOISY = 0x02;
+    private static final byte NOISE_NOISY = 0x02;
 
     private final float temp;
 

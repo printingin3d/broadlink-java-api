@@ -34,7 +34,7 @@
   <groupId>eu.printingin3d.blapi</groupId>
   <artifactId>broadlink-java-api</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
 
   <name>broadlink-java-api</name>
   <description>A clean, hacked Broadlink API for Java</description>

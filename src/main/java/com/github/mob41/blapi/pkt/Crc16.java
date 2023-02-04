@@ -6,7 +6,7 @@ package com.github.mob41.blapi.pkt;
  * 
  * Used to calculate the CRC-16 (cyclical redundancy check) for an array of bytes.
  */
-public class Crc16 {
+public final class Crc16 {
 
     private Crc16() {
     };

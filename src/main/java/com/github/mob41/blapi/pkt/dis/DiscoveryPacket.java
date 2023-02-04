@@ -46,8 +46,7 @@ import com.github.mob41.blapi.pkt.Packet;
  *
  */
 public class DiscoveryPacket implements Packet {
-
-    public static final int DEFAULT_SOURCE_PORT = 0; // This source port is from
+    private static final int DEFAULT_SOURCE_PORT = 0; // This source port is from
                                                      // the python-broadlink
                                                      // source code
 
@@ -159,7 +158,7 @@ public class DiscoveryPacket implements Packet {
         short checksum = (short) 0xbeaf;
 
         for (int i = 0; i < data.length; i++) {
-            checksum += (int) (data[i] & 0xff);
+            checksum += data[i] & 0xff;
         }
 
         log.debug("checksum=" + Integer.toHexString(checksum));

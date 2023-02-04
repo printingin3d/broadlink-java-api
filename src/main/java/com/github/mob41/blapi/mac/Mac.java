@@ -82,7 +82,18 @@ public class Mac {
      * @return MAC address in String
      */
     public String getMacString() {
-        return bytesToMacStr(mac);
+        String str = "";
+
+        for (int i = 0; i < mac.length; i++) {
+            String hexStr = String.format("%02x", mac[i]);
+            str += hexStr;
+
+            if (i != mac.length - 1) {
+                str += ':';
+            }
+        }
+        return str;
+
     }
 
     /**
@@ -97,7 +108,7 @@ public class Mac {
      *                            does not have 6 hex separated by cottons (:), or, a
      *                            <code>null</code> is specified
      */
-    public static byte[] macStrToBytes(String macStr) throws MacFormatException {
+    private static byte[] macStrToBytes(String macStr) throws MacFormatException {
         if (macStr == null) {
             throw new MacFormatException(macStr);
         }
@@ -111,8 +122,7 @@ public class Mac {
         byte[] bout = new byte[6];
         for (int i = 0; i < macs.length; i++) {
             try {
-                Integer hex = Integer.parseInt(macs[i], 16);
-                bout[i] = hex.byteValue();
+                bout[i] = Byte.parseByte(macs[i], 16);
             } catch (NumberFormatException e) {
                 throw new MacFormatException(macStr, e);
             }
@@ -131,34 +141,8 @@ public class Mac {
      * @param macBytes The byte array to be validated
      * @return The validation result
      */
-    public static boolean isMACValid(byte[] macBytes) {
+    private static boolean isMACValid(byte[] macBytes) {
         return macBytes != null && macBytes.length == 6;
-    }
-
-    /**
-     * Converts MAC address bytes into String
-     *
-     * @param macBytes The 6-byte MAC Address in byte array
-     * @return A MAC address String converted from the byte array
-     * @throws MacFormatException If the MAC address bytes array specified is not with length 6
-     *                            or <code>null</code>
-     */
-    public static String bytesToMacStr(byte[] macBytes) throws MacFormatException {
-        if (!isMACValid(macBytes)) {
-            throw new MacFormatException(macBytes);
-        }
-
-        String str = "";
-
-        for (int i = 0; i < macBytes.length; i++) {
-            String hexStr = String.format("%02x", macBytes[i]);
-            str += hexStr;
-
-            if (i != macBytes.length - 1) {
-                str += ':';
-            }
-        }
-        return str;
     }
 
     @Override
