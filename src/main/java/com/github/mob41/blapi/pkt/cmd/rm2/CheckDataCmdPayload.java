@@ -47,5 +47,4 @@ public final class CheckDataCmdPayload implements CmdPayload {
     public int getCommand() {
         return 0x04;
     }
-
 }

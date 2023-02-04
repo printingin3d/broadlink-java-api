@@ -33,8 +33,7 @@ import java.net.DatagramPacket;
 import javax.xml.bind.DatatypeConverter;
 
 import com.github.mob41.blapi.mac.Mac;
-import com.github.mob41.blapi.pkt.CmdPayload;
-import com.github.mob41.blapi.pkt.Payload;
+import com.github.mob41.blapi.pkt.cmd.rm2.RMTempCmdPayload;
 
 public class A1Device extends BLDevice {
 
@@ -43,24 +42,7 @@ public class A1Device extends BLDevice {
     }
 
     public EnvData getSensorsData() throws Exception {
-        DatagramPacket packet = sendCmdPkt(new CmdPayload() {
-
-            @Override
-            public byte getPacketType() {
-                return 0x6a;
-            }
-
-            @Override
-            public Payload getPayload() {
-                return Payload.EMPTY_PAYLOAD;
-            }
-
-            @Override
-            public int getCommand() {
-                return 1;
-            }
-
-        });
+        DatagramPacket packet = sendCmdPkt(new RMTempCmdPayload());
         byte[] data = packet.getData();
 
         log.debug("A1 check sensors received encrypted bytes: " + DatatypeConverter.printHexBinary(data));

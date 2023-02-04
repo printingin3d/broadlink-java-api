@@ -33,11 +33,10 @@ import com.github.mob41.blapi.pkt.CmdPayload;
 import com.github.mob41.blapi.pkt.Payload;
 
 public final class SendDataCmdPayload implements CmdPayload {
-
     private final Payload payload;
 
-    public SendDataCmdPayload(byte[] irRfCodeData) {
-        payload = new BytePayload(irRfCodeData);
+    public SendDataCmdPayload(byte[] payload) {
+        this.payload = new BytePayload(payload);
     }
 
     @Override
@@ -54,5 +53,4 @@ public final class SendDataCmdPayload implements CmdPayload {
     public int getCommand() {
         return 0x02;
     }
-
 }

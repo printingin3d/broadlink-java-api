@@ -34,8 +34,7 @@ import java.net.DatagramPacket;
 import javax.xml.bind.DatatypeConverter;
 
 import com.github.mob41.blapi.mac.Mac;
-import com.github.mob41.blapi.pkt.CmdPayload;
-import com.github.mob41.blapi.pkt.Payload;
+import com.github.mob41.blapi.pkt.cmd.rm2.SendDataCmdPayload;
 
 public class SP1Device extends BLDevice {
 
@@ -44,33 +43,7 @@ public class SP1Device extends BLDevice {
     }
 
     public void setPower(final boolean state) throws Exception {
-        DatagramPacket packet = sendCmdPkt(new CmdPayload() {
-
-            @Override
-            public byte getPacketType() {
-                return 0x66;
-            }
-
-            @Override
-            public Payload getPayload() {
-                return new Payload() {
-
-                    @Override
-                    public byte[] getData() {
-                        byte[] b = new byte[4];
-                        b[0] = (byte) (state ? 1 : 0);
-                        return b;
-                    }
-
-                };
-            }
-
-            @Override
-            public int getCommand() {
-                return -1;
-            }
-
-        });
+        DatagramPacket packet = sendCmdPkt(new SendDataCmdPayload(new byte[] { (byte) (state ? 1 : 0) }));
 
         byte[] data = packet.getData();
 
