@@ -122,7 +122,7 @@ public class Mac {
         byte[] bout = new byte[6];
         for (int i = 0; i < macs.length; i++) {
             try {
-                bout[i] = Byte.parseByte(macs[i], 16);
+                bout[i] = new Integer(Integer.parseInt(macs[i],16)).byteValue();
             } catch (NumberFormatException e) {
                 throw new MacFormatException(macStr, e);
             }
