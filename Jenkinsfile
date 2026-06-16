@@ -9,11 +9,6 @@ pipeline {
         }
     }        
 
-    options {
-        timestamper() 
-        timeout(time: 1, unit: 'HOURS')
-    }
-
     triggers {
         pollSCM 'H/15 * * * *'
     }
